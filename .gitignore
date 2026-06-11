@@ -1,0 +1,24 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+
+# 빌드 산출물
+x64/
+Debug/
+Release/
+assembleCar/x64/
+
+# 컴파일 중간 파일
+*.obj
+*.pdb
+*.ilk
+*.log
+*.tlog
+*.recipe
+*.idb
+
+# NuGet 패키지 (바이너리)
+packages/
