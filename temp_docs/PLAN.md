@@ -46,6 +46,7 @@ PDF 24페이지 기준 기존 시스템의 문제점:
 - **2-4.** 자동차 타입 → `ICarType` 인터페이스 + 구체 클래스 (`Sedan`, `Suv`, `Truck`)
 - **2-5.** 조립 흐름 → `CarAssembler` 클래스로 분리
 - **2-6.** UI/출력 → `ConsoleUI` 클래스로 분리 (`printf` → `std::cout`)
+- **2-6a.** 첫 화면(차량 타입 선택)에 `0. 종료` 옵션 추가 — `requestExit()` 메서드로 `CarAssembler` 연동
 
 → [PHASE2.md 상세 보기](PHASE2.md)
 

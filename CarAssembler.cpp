@@ -35,8 +35,9 @@ Car CarAssembler::buildCar() {
         switch (step) {
         case Step::CAR_TYPE: {
             ui_.showCarTypeMenu();
-            int answer = ui_.readInt(1, 3);
+            int answer = ui_.readInt(0, 3);
             if (ui_.isExitRequested()) return car;
+            if (answer == 0) { ui_.requestExit(); return car; }
             switch (answer) {
             case 1: car.carType = std::make_unique<Sedan>(); break;
             case 2: car.carType = std::make_unique<Suv>();   break;

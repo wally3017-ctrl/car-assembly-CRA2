@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include "Car.h"
 
@@ -19,6 +19,7 @@ public:
     virtual int readInt(int min, int max);
 
     bool isExitRequested() const { return exitRequested_; }
+    void requestExit()           { exitRequested_ = true;  }
 
 private:
     bool exitRequested_ = false;
