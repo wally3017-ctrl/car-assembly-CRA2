@@ -1,4 +1,4 @@
-﻿#include "CarAssembler.h"
+#include "CarAssembler.h"
 #include "types/Sedan.h"
 #include "types/Suv.h"
 #include "types/Truck.h"
@@ -11,6 +11,65 @@
 #include "parts/BoschBrake.h"
 #include "parts/BoschSteering.h"
 #include "parts/MobisSteering.h"
+
+const std::vector<CarAssembler::AssemblyStep> CarAssembler::steps_ = {
+    {
+        &ConsoleUI::showCarTypeMenu,
+        3,
+        [](Car& car, int ans) {
+            switch (ans) {
+            case 1: car.carType = std::make_unique<Sedan>(); break;
+            case 2: car.carType = std::make_unique<Suv>();   break;
+            case 3: car.carType = std::make_unique<Truck>(); break;
+            }
+        },
+        [](const Car& car) {
+            return "차량 타입으로 " + car.carType->getName() + "을(를) 선택하셨습니다.";
+        }
+    },
+    {
+        &ConsoleUI::showEngineMenu,
+        4,
+        [](Car& car, int ans) {
+            switch (ans) {
+            case 1: car.engine = std::make_unique<GmEngine>();     break;
+            case 2: car.engine = std::make_unique<ToyotaEngine>(); break;
+            case 3: car.engine = std::make_unique<WiaEngine>();    break;
+            case 4: car.engine = std::make_unique<BrokenEngine>(); break;
+            }
+        },
+        [](const Car& car) {
+            return car.engine->getName() + " 엔진을 선택하셨습니다.";
+        }
+    },
+    {
+        &ConsoleUI::showBrakeSystemMenu,
+        3,
+        [](Car& car, int ans) {
+            switch (ans) {
+            case 1: car.brakeSystem = std::make_unique<MandoBrake>();       break;
+            case 2: car.brakeSystem = std::make_unique<ContinentalBrake>(); break;
+            case 3: car.brakeSystem = std::make_unique<BoschBrake>();       break;
+            }
+        },
+        [](const Car& car) {
+            return car.brakeSystem->getName() + " 제동장치를 선택하셨습니다.";
+        }
+    },
+    {
+        &ConsoleUI::showSteeringSystemMenu,
+        2,
+        [](Car& car, int ans) {
+            switch (ans) {
+            case 1: car.steeringSystem = std::make_unique<BoschSteering>(); break;
+            case 2: car.steeringSystem = std::make_unique<MobisSteering>(); break;
+            }
+        },
+        [](const Car& car) {
+            return car.steeringSystem->getName() + " 조향장치를 선택하셨습니다.";
+        }
+    }
+};
 
 CarAssembler::CarAssembler(ConsoleUI& ui, const CarValidator& validator)
     : ui_(ui), validator_(validator) {}
@@ -25,76 +84,27 @@ void CarAssembler::run() {
 }
 
 Car CarAssembler::buildCar() {
-    enum class Step { CAR_TYPE, ENGINE, BRAKE, STEERING, DONE };
     Car car;
-    Step step = Step::CAR_TYPE;
+    int stepIdx = 0;
 
-    while (step != Step::DONE) {
+    while (stepIdx < static_cast<int>(steps_.size())) {
         if (ui_.isExitRequested()) return car;
 
-        switch (step) {
-        case Step::CAR_TYPE: {
-            ui_.showCarTypeMenu();
-            int answer = ui_.readInt(0, 3);
-            if (ui_.isExitRequested()) return car;
-            if (answer == 0) { ui_.requestExit(); return car; }
-            switch (answer) {
-            case 1: car.carType = std::make_unique<Sedan>(); break;
-            case 2: car.carType = std::make_unique<Suv>();   break;
-            case 3: car.carType = std::make_unique<Truck>(); break;
-            }
-            ui_.showMessage("차량 타입으로 " + car.carType->getName() + "을(를) 선택하셨습니다.");
-            ui_.delay(800);
-            step = Step::ENGINE;
-            break;
+        const auto& step = steps_[stepIdx];
+        (ui_.*step.showMenu)();
+        int answer = ui_.readInt(0, step.maxChoice);
+        if (ui_.isExitRequested()) return car;
+
+        if (answer == 0) {
+            if (stepIdx == 0) { ui_.requestExit(); return car; }
+            --stepIdx;
+            continue;
         }
-        case Step::ENGINE: {
-            ui_.showEngineMenu();
-            int answer = ui_.readInt(0, 4);
-            if (ui_.isExitRequested()) return car;
-            if (answer == 0) { step = Step::CAR_TYPE; break; }
-            switch (answer) {
-            case 1: car.engine = std::make_unique<GmEngine>();      break;
-            case 2: car.engine = std::make_unique<ToyotaEngine>();  break;
-            case 3: car.engine = std::make_unique<WiaEngine>();     break;
-            case 4: car.engine = std::make_unique<BrokenEngine>();  break;
-            }
-            ui_.showMessage(car.engine->getName() + " 엔진을 선택하셨습니다.");
-            ui_.delay(800);
-            step = Step::BRAKE;
-            break;
-        }
-        case Step::BRAKE: {
-            ui_.showBrakeSystemMenu();
-            int answer = ui_.readInt(0, 3);
-            if (ui_.isExitRequested()) return car;
-            if (answer == 0) { step = Step::ENGINE; break; }
-            switch (answer) {
-            case 1: car.brakeSystem = std::make_unique<MandoBrake>();       break;
-            case 2: car.brakeSystem = std::make_unique<ContinentalBrake>(); break;
-            case 3: car.brakeSystem = std::make_unique<BoschBrake>();       break;
-            }
-            ui_.showMessage(car.brakeSystem->getName() + " 제동장치를 선택하셨습니다.");
-            ui_.delay(800);
-            step = Step::STEERING;
-            break;
-        }
-        case Step::STEERING: {
-            ui_.showSteeringSystemMenu();
-            int answer = ui_.readInt(0, 2);
-            if (ui_.isExitRequested()) return car;
-            if (answer == 0) { step = Step::BRAKE; break; }
-            switch (answer) {
-            case 1: car.steeringSystem = std::make_unique<BoschSteering>(); break;
-            case 2: car.steeringSystem = std::make_unique<MobisSteering>(); break;
-            }
-            ui_.showMessage(car.steeringSystem->getName() + " 조향장치를 선택하셨습니다.");
-            ui_.delay(800);
-            step = Step::DONE;
-            break;
-        }
-        default: break;
-        }
+
+        step.applyChoice(car, answer);
+        ui_.showMessage(step.confirmMsg(car));
+        ui_.delay(800);
+        ++stepIdx;
     }
 
     return car;

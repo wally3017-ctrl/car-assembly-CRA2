@@ -17,6 +17,7 @@ PDF 24페이지 기준 기존 시스템의 문제점:
 | [PHASE 1](PHASE1.md) | Method Level | 함수·변수 단위 국소 수정 |
 | [PHASE 2](PHASE2.md) | Class Level | 절차지향 → 객체지향 구조 전환 |
 | [PHASE 3](PHASE3.md) | Unit Test | GoogleMock 기반 유닛 테스트 작성 |
+| [PHASE 4](PHASE4.md) | Pattern Level | 반복 구조 제거 · 테이블 기반 설계로 전환 |
 
 ---
 
@@ -64,6 +65,19 @@ PDF 24페이지 기준 기존 시스템의 문제점:
 > 총 23개 테스트 (CarValidatorTest 16 + CarAssemblerTest 7)
 
 → [PHASE3.md 상세 보기](PHASE3.md)
+
+---
+
+## [PHASE 4 : Pattern Level 리팩토링](PHASE4.md)
+
+> 반복 코드 구조를 데이터 테이블로 대체한다. 새 부품·규칙 추가 시 기존 로직을 변경하지 않고 테이블만 확장할 수 있다.  
+> 선행 조건: PHASE 3 완료
+
+- **4-1.** `CarAssembler::buildCar()` 단계 반복 구조 → `AssemblyStep` 테이블 기반으로 전환
+- **4-2.** `buildCar()` 내 매직 넘버 → `AssemblyStep::maxChoice` 필드로 단일화
+- **4-3.** `CarValidator` 5개 개별 검증 메서드 → `ValidationRule` 테이블 기반으로 통합
+
+→ [PHASE4.md 상세 보기](PHASE4.md)
 
 ---
 

@@ -1,5 +1,7 @@
 #pragma once
+#include <functional>
 #include <string>
+#include <vector>
 #include "Car.h"
 
 class CarValidator {
@@ -8,9 +10,10 @@ public:
     std::string getInvalidReason(const Car& car) const;
 
 private:
-    bool checkBrakeSteeringCompatibility(const Car& car) const;
-    bool checkSedanContinental(const Car& car) const;
-    bool checkSuvToyota(const Car& car) const;
-    bool checkTruckWia(const Car& car) const;
-    bool checkTruckMando(const Car& car) const;
+    struct ValidationRule {
+        std::string errorMessage;
+        std::function<bool(const Car&)> check;
+    };
+
+    static const std::vector<ValidationRule> rules_;
 };

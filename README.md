@@ -82,7 +82,7 @@ assembleCar/
 
 ## 리팩토링 계획
 
-절차지향(C-style) Legacy 코드를 3단계에 걸쳐 객체지향 설계로 전환하였습니다.  
+절차지향(C-style) Legacy 코드를 4단계에 걸쳐 객체지향 설계로 전환하였습니다.  
 각 단계별 상세 내용은 아래 문서를 참고하세요.
 
 → **[temp_docs/PLAN.md](temp_docs/PLAN.md)**
@@ -92,3 +92,4 @@ assembleCar/
 | PHASE 1 | Method Level — 함수·변수 단위 품질 개선 | [PHASE1.md](temp_docs/PHASE1.md) |
 | PHASE 2 | Class Level — 절차지향 → 객체지향 전환 | [PHASE2.md](temp_docs/PHASE2.md) |
 | PHASE 3 | Unit Test — GoogleMock 기반 테스트 작성 | [PHASE3.md](temp_docs/PHASE3.md) |
+| PHASE 4 | Pattern Level — 테이블 기반 설계로 반복 구조 제거 | [PHASE4.md](temp_docs/PHASE4.md) |
