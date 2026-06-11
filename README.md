@@ -16,7 +16,7 @@ C++로 구현된 자동차 조립 시뮬레이터입니다.
 
 | 부품 | 선택지 |
 |---|---|
-| 엔진 | GM · TOYOTA · WIA |
+| 엔진 | GM · TOYOTA · WIA · 고장난 엔진 |
 | 제동장치 | MANDO · CONTINENTAL · BOSCH |
 | 조향장치 | BOSCH · MOBIS |
 
@@ -82,8 +82,8 @@ assembleCar/
 
 ## 리팩토링 계획
 
-현재 코드는 절차지향(C-style)으로 구현되어 있습니다.  
-객체지향 설계로의 전환 계획은 아래 문서를 참고하세요.
+절차지향(C-style) Legacy 코드를 3단계에 걸쳐 객체지향 설계로 전환하였습니다.  
+각 단계별 상세 내용은 아래 문서를 참고하세요.
 
 → **[temp_docs/PLAN.md](temp_docs/PLAN.md)**
 
