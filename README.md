@@ -38,11 +38,18 @@ Visual Studio 2022 기준 (`.slnx` 솔루션 파일 사용)
 
 ```
 # Release 빌드 — 인터랙티브 시뮬레이터 실행
-x64/Debug/assembleCar.exe
+x64/Release/assembleCar.exe
 
-# Debug 빌드 — GoogleMock 유닛 테스트 실행
-#ifdef _DEBUG 블록이 활성화되어 RUN_ALL_TESTS() 실행
+# Debug 빌드 — GoogleMock 유닛 테스트 실행 (23개)
+x64/Debug/assembleCar.exe
 ```
+
+빌드 구성별 포함 파일:
+
+| 구성 | 컴파일 대상 | 제외 대상 |
+|---|---|---|
+| Release | `main.cpp` | `tests/*.cpp` |
+| Debug | `tests/test_main.cpp`, `tests/*Test.cpp` | `main.cpp` |
 
 ### 의존성
 
@@ -54,9 +61,18 @@ x64/Debug/assembleCar.exe
 
 ```
 assembleCar/
-├── main.cpp                  # 진입점 (Release: 시뮬레이터 / Debug: 테스트)
+├── main.cpp                  # 시뮬레이터 진입점 (Release 전용)
+├── Car.h
+├── CarValidator.h / .cpp     # 조합 유효성 검사
+├── CarAssembler.h / .cpp     # 조립 흐름 제어
+├── ConsoleUI.h    / .cpp     # 화면 출력 · 입력 처리
+├── parts/                    # 부품 인터페이스 및 구체 클래스
+├── types/                    # 차량 타입 인터페이스 및 구체 클래스
+├── tests/                    # 유닛 테스트 (Debug 전용)
+│   ├── test_main.cpp         #   테스트 진입점
+│   ├── CarValidatorTest.cpp  #   제한조건 검증 16개
+│   └── CarAssemblerTest.cpp  #   조립 흐름 검증 7개
 ├── assembleCar.vcxproj       # Visual Studio 프로젝트 파일
-├── assembleCar.slnx          # 솔루션 파일
 ├── packages/                 # NuGet 패키지 (gmock 1.11.0)
 ├── docs/                     # 요구사항 문서
 └── temp_docs/                # 리팩토링 계획 문서

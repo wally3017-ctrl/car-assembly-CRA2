@@ -79,80 +79,69 @@ vcxproj 내 파일별 `ExcludedFromBuild` 조건으로 제어한다:
 
 ## 3-2. `CarValidator` 테스트 — 5가지 제한 조건 검증
 
-PDF 23페이지의 제한 조건을 기반으로 각 조건별 `PASS`/`FAIL` 케이스를 모두 작성한다.
+PDF 23페이지의 제한 조건을 기반으로 각 조건별 `isValid()` PASS/FAIL 케이스와 `getInvalidReason()` 메시지 검증을 모두 작성한다.
 
 ### 테스트 파일: `tests/CarValidatorTest.cpp`
 
-| 테스트 케이스 | 설명 | 기대 결과 |
-|---|---|---|
-| `BoschBrake_requires_BoschSteering` | Bosch 제동 + Mobis 조향 | `isValid() == false` |
-| `BoschBrake_with_BoschSteering_is_valid` | Bosch 제동 + Bosch 조향 | `isValid() == true` |
-| `Sedan_with_Continental_is_invalid` | Sedan + Continental 제동 | `isValid() == false` |
-| `Sedan_with_Mando_is_valid` | Sedan + Mando 제동 | `isValid() == true` |
-| `SUV_with_Toyota_engine_is_invalid` | SUV + TOYOTA 엔진 | `isValid() == false` |
-| `Truck_with_WIA_engine_is_invalid` | Truck + WIA 엔진 | `isValid() == false` |
-| `Truck_with_Mando_brake_is_invalid` | Truck + MANDO 제동 | `isValid() == false` |
-| `valid_combination_passes_all_checks` | Sedan + GM + Mando + Mobis | `isValid() == true` |
+#### isValid() — 16개 케이스
 
-```cpp
-// tests/CarValidatorTest.cpp
-#include "gmock/gmock.h"
-#include "../Car.h"
-#include "../CarValidator.h"
+| # | 테스트 케이스 | 조합 | 기대 결과 |
+|---|---|---|---|
+| TC1 | `BoschBrake_requires_BoschSteering` | Sedan + GM + **Bosch** 제동 + Mobis 조향 | `isValid() == false` |
+| TC2 | `BoschBrake_with_BoschSteering_is_valid` | Sedan + GM + **Bosch** 제동 + **Bosch** 조향 | `isValid() == true` |
+| TC3 | `Sedan_with_Continental_is_invalid` | **Sedan** + GM + **Continental** 제동 + Mobis | `isValid() == false` |
+| TC4 | `Sedan_with_Mando_is_valid` | **Sedan** + GM + Mando 제동 + Mobis | `isValid() == true` |
+| TC5 | `SUV_with_Toyota_engine_is_invalid` | **SUV** + **TOYOTA** + Mando + Mobis | `isValid() == false` |
+| TC6 | `Truck_with_WIA_engine_is_invalid` | **Truck** + **WIA** + Mando + Mobis | `isValid() == false` |
+| TC7 | `Truck_with_Mando_brake_is_invalid` | **Truck** + GM + **Mando** + Mobis | `isValid() == false` |
+| TC8 | `valid_combination_passes_all_checks` | Sedan + GM + Mando + Mobis | `isValid() == true` |
+| TC9 | `SUV_with_non_Toyota_engine_is_valid` | **SUV** + **GM** + Mando + Mobis | `isValid() == true` |
+| TC10 | `Truck_with_non_WIA_non_Mando_is_valid` | **Truck** + **GM** + **Continental** + Mobis | `isValid() == true` |
+| TC11 | `getInvalidReason_Bosch_Mobis_mentions_Bosch` | Sedan + GM + Bosch + Mobis | 메시지에 "Bosch" 포함 |
+| TC12 | `getInvalidReason_Sedan_Continental_mentions_Continental` | Sedan + GM + Continental + Mobis | 메시지에 "Continental" 포함 |
+| TC13 | `getInvalidReason_SUV_Toyota_mentions_TOYOTA` | SUV + TOYOTA + Mando + Mobis | 메시지에 "TOYOTA" 포함 |
+| TC14 | `getInvalidReason_Truck_WIA_mentions_WIA` | Truck + WIA + Continental + Mobis | 메시지에 "WIA" 포함 |
+| TC15 | `getInvalidReason_Truck_Mando_mentions_Mando` | Truck + GM + Mando + Mobis | 메시지에 "Mando" 포함 |
+| TC16 | `getInvalidReason_empty_for_valid_car` | Sedan + GM + Mando + Mobis | `getInvalidReason() == ""` |
 
-class CarValidatorTest : public ::testing::Test {
-protected:
-    CarValidator validator;
-};
-
-TEST_F(CarValidatorTest, BoschBrake_requires_BoschSteering) {
-    Car car{ CarType::SEDAN, Engine::GM, BrakeSystem::BOSCH, SteeringSystem::MOBIS };
-    EXPECT_FALSE(validator.isValid(car));
-}
-
-TEST_F(CarValidatorTest, Sedan_with_Continental_is_invalid) {
-    Car car{ CarType::SEDAN, Engine::GM, BrakeSystem::CONTINENTAL, SteeringSystem::MOBIS };
-    EXPECT_FALSE(validator.isValid(car));
-}
-
-TEST_F(CarValidatorTest, valid_combination_passes_all_checks) {
-    Car car{ CarType::SEDAN, Engine::GM, BrakeSystem::MANDO, SteeringSystem::MOBIS };
-    EXPECT_TRUE(validator.isValid(car));
-}
-
-// ... (나머지 케이스 동일 패턴)
-```
+> TC11~TC15: `EXPECT_THAT(validator.getInvalidReason(car), testing::HasSubstr("키워드"))` 패턴으로 검증
 
 ---
 
 ## 3-3. `CarAssembler` 테스트 — 조립 단계 전환 검증
 
-`ConsoleUI`를 Mock으로 대체하여 입력 시나리오별 조립 결과를 검증한다.
+`ConsoleUI`를 `NiceMock`으로 대체하여 입력 시나리오별 조립 결과를 검증한다.  
+`showMessage`, `delay` 등 비검증 메서드는 `NiceMock`이 묵시적으로 처리한다.
 
-### 테스트 파일: `tests/CarAssemblerTest.cpp`
+### MockConsoleUI
 
 ```cpp
-// tests/CarAssemblerTest.cpp
-#include "gmock/gmock.h"
-#include "../CarAssembler.h"
-#include "../ConsoleUI.h"
-
 class MockConsoleUI : public ConsoleUI {
 public:
-    MOCK_METHOD(int, readInt, (int min, int max), (override));
-    MOCK_METHOD(void, showCarTypeMenu,        (), (const, override));
-    MOCK_METHOD(void, showEngineMenu,         (), (const, override));
-    MOCK_METHOD(void, showBrakeSystemMenu,    (), (const, override));
-    MOCK_METHOD(void, showSteeringSystemMenu, (), (const, override));
+    MOCK_METHOD(int,  readInt,               (int, int),           (override));
+    MOCK_METHOD(void, showCarTypeMenu,       (),                   (const, override));
+    MOCK_METHOD(void, showEngineMenu,        (),                   (const, override));
+    MOCK_METHOD(void, showBrakeSystemMenu,   (),                   (const, override));
+    MOCK_METHOD(void, showSteeringSystemMenu,(),                   (const, override));
+    MOCK_METHOD(void, showRunTestMenu,       (),                   (const, override));
+    MOCK_METHOD(void, showMessage,           (const std::string&), (const, override));
+    MOCK_METHOD(void, showError,             (const std::string&), (const, override));
+    MOCK_METHOD(void, showCarInfo,           (const Car&),         (const, override));
+    MOCK_METHOD(void, delay,                 (int),                (const, override));
 };
 ```
 
-| 테스트 케이스 | 시나리오 | 검증 내용 |
-|---|---|---|
-| `assemble_returns_correct_car_type` | 사용자가 1(Sedan) 선택 | `car.carType == CarType::SEDAN` |
-| `assemble_returns_correct_engine` | 사용자가 2(TOYOTA) 선택 | `car.engine == Engine::TOYOTA` |
-| `back_navigation_returns_to_previous_step` | 이전 단계에서 0 입력 | 이전 메뉴 재표시 |
-| `invalid_input_shows_error_and_retries` | 범위 외 숫자 입력 | `showError()` 호출 후 재입력 요청 |
+### 테스트 파일: `tests/CarAssemblerTest.cpp`
+
+| # | 테스트 케이스 | 입력 시나리오 | 검증 내용 |
+|---|---|---|---|
+| TC1 | `SelectSedan_displaysSedan` | Sedan(1)→GM(1)→Mando(1)→Mobis(2)→Exit | `showMessage("...Sedan...")` 호출 확인 |
+| TC2 | `SelectToyotaEngine_displaysToyota` | Sedan(1)→TOYOTA(2)→Mando(1)→Mobis(2)→Exit | `showMessage("TOYOTA...")` 호출 확인 |
+| TC3 | `BackNavigation_returns_to_CarType` | Sedan(1)→ENGINE back(0)→Exit(0) | `showCarTypeMenu()` 2회 호출 확인 |
+| TC4 | `ExitOption_terminates_run` | CarType에서 Exit(0) | `showEngineMenu()` 0회 호출 확인 |
+| TC5 | `BrokenEngine_run_does_not_show_carInfo` | Sedan+BrokenEngine(4)+Mando+Mobis→RUN(1)→Exit | `showCarInfo()` 0회 호출 확인 |
+| TC6 | `InvalidCar_test_shows_FAIL` | Sedan+GM+Continental+Mobis→Test(2)→Exit | `showMessage("...FAIL...")` 호출 확인 |
+| TC7 | `ValidCar_test_shows_PASS` | Sedan+GM+Mando+Mobis→Test(2)→Exit | `showMessage("...PASS...")` 호출 확인 |
 
 ---
 
@@ -163,6 +152,8 @@ assembleCar/
 ├── main.cpp                     // 시뮬레이터 진입점만 담당 (#ifdef 제거)
 └── tests/
     ├── test_main.cpp            // 테스트 진입점 (InitGoogleMock + RUN_ALL_TESTS)
-    ├── CarValidatorTest.cpp     // 제한 조건 5가지 × PASS/FAIL = 최소 8개 케이스
-    └── CarAssemblerTest.cpp     // 조립 흐름 × 입력 시나리오 = 최소 4개 케이스
+    ├── CarValidatorTest.cpp     // 제한 조건 5가지 × isValid/getInvalidReason = 16개 케이스
+    └── CarAssemblerTest.cpp     // 조립 흐름 × 입력 시나리오 = 7개 케이스
 ```
+
+> **총 테스트: 23개** (CarValidatorTest 16 + CarAssemblerTest 7)

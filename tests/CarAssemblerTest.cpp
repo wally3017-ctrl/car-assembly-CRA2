@@ -93,3 +93,65 @@ TEST_F(CarAssemblerTest, ExitOption_terminates_run) {
     CarAssembler assembler(mockUI, validator);
     assembler.run();
 }
+
+// TC5: BrokenEngine(4) selected -> RUN(1) does not call showCarInfo
+// Sedan(1)+BrokenEngine(4)+Mando(1)+Mobis(2) = valid parts but isBroken==true
+// Input: readInt(0,3)=1,1,0 / readInt(0,4)=4 / readInt(0,2)=2(Mobis),1(RUN),0(exit)
+TEST_F(CarAssemblerTest, BrokenEngine_run_does_not_show_carInfo) {
+    NiceMock<MockConsoleUI> mockUI;
+    EXPECT_CALL(mockUI, showCarInfo(_)).Times(0);
+    EXPECT_CALL(mockUI, readInt(0, 3))
+        .WillOnce(Return(1))
+        .WillOnce(Return(1))
+        .WillOnce(Return(0));
+    EXPECT_CALL(mockUI, readInt(0, 4)).WillOnce(Return(4));
+    EXPECT_CALL(mockUI, readInt(0, 2))
+        .WillOnce(Return(2))
+        .WillOnce(Return(1))
+        .WillOnce(Return(0));
+
+    CarAssembler assembler(mockUI, validator);
+    assembler.run();
+}
+
+// TC6: Invalid car + Test(2) -> showMessage contains "FAIL"
+// Sedan(1)+GM(1)+Continental(2)+Mobis(2) = invalid (Sedan+Continental violates condition 2a)
+// Input: readInt(0,3)=1,2,0 / readInt(0,4)=1 / readInt(0,2)=2(Mobis),2(Test),0(exit)
+TEST_F(CarAssemblerTest, InvalidCar_test_shows_FAIL) {
+    NiceMock<MockConsoleUI> mockUI;
+    EXPECT_CALL(mockUI, showMessage(_)).Times(testing::AnyNumber());
+    EXPECT_CALL(mockUI, showMessage(testing::HasSubstr("FAIL"))).Times(AtLeast(1));
+    EXPECT_CALL(mockUI, readInt(0, 3))
+        .WillOnce(Return(1))
+        .WillOnce(Return(2))
+        .WillOnce(Return(0));
+    EXPECT_CALL(mockUI, readInt(0, 4)).WillOnce(Return(1));
+    EXPECT_CALL(mockUI, readInt(0, 2))
+        .WillOnce(Return(2))
+        .WillOnce(Return(2))
+        .WillOnce(Return(0));
+
+    CarAssembler assembler(mockUI, validator);
+    assembler.run();
+}
+
+// TC7: Valid car + Test(2) -> showMessage contains "PASS"
+// Sedan(1)+GM(1)+Mando(1)+Mobis(2) = valid
+// Input: readInt(0,3)=1,1,0 / readInt(0,4)=1 / readInt(0,2)=2(Mobis),2(Test),0(exit)
+TEST_F(CarAssemblerTest, ValidCar_test_shows_PASS) {
+    NiceMock<MockConsoleUI> mockUI;
+    EXPECT_CALL(mockUI, showMessage(_)).Times(testing::AnyNumber());
+    EXPECT_CALL(mockUI, showMessage(testing::HasSubstr("PASS"))).Times(AtLeast(1));
+    EXPECT_CALL(mockUI, readInt(0, 3))
+        .WillOnce(Return(1))
+        .WillOnce(Return(1))
+        .WillOnce(Return(0));
+    EXPECT_CALL(mockUI, readInt(0, 4)).WillOnce(Return(1));
+    EXPECT_CALL(mockUI, readInt(0, 2))
+        .WillOnce(Return(2))
+        .WillOnce(Return(2))
+        .WillOnce(Return(0));
+
+    CarAssembler assembler(mockUI, validator);
+    assembler.run();
+}

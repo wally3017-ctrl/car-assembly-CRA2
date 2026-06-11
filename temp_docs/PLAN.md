@@ -58,8 +58,10 @@ PDF 24페이지 기준 기존 시스템의 문제점:
 > 선행 조건: PHASE 2 완료
 
 - **3-1.** 테스트 진입점 분리 — `main.cpp`의 `#ifdef _DEBUG` 블록 제거 → `tests/test_main.cpp` 신규 생성, vcxproj 빌드 구성별 포함 파일 분리
-- **3-2.** `CarValidator` 테스트 — 5가지 제한 조건 × PASS/FAIL 케이스 (최소 8개)
-- **3-3.** `CarAssembler` 테스트 — Mock UI로 조립 단계 전환·입력 시나리오 검증 (최소 4개)
+- **3-2.** `CarValidator` 테스트 — 5가지 제한 조건별 `isValid()` PASS/FAIL + `getInvalidReason()` 메시지 검증 (16개)
+- **3-3.** `CarAssembler` 테스트 — `NiceMock<ConsoleUI>`로 조립 흐름·BrokenEngine·Test 결과 검증 (7개)
+
+> 총 23개 테스트 (CarValidatorTest 16 + CarAssemblerTest 7)
 
 → [PHASE3.md 상세 보기](PHASE3.md)
 
