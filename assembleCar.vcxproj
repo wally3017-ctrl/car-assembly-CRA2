@@ -139,7 +139,32 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CarAssembler.cpp" />
+    <ClCompile Include="CarValidator.cpp" />
+    <ClCompile Include="ConsoleUI.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Car.h" />
+    <ClInclude Include="CarAssembler.h" />
+    <ClInclude Include="CarValidator.h" />
+    <ClInclude Include="ConsoleUI.h" />
+    <ClInclude Include="parts\BrokenEngine.h" />
+    <ClInclude Include="parts\BoschBrake.h" />
+    <ClInclude Include="parts\BoschSteering.h" />
+    <ClInclude Include="parts\ContinentalBrake.h" />
+    <ClInclude Include="parts\GmEngine.h" />
+    <ClInclude Include="parts\IBrakeSystem.h" />
+    <ClInclude Include="parts\IEngine.h" />
+    <ClInclude Include="parts\ISteeringSystem.h" />
+    <ClInclude Include="parts\MandoBrake.h" />
+    <ClInclude Include="parts\MobisSteering.h" />
+    <ClInclude Include="parts\ToyotaEngine.h" />
+    <ClInclude Include="parts\WiaEngine.h" />
+    <ClInclude Include="types\ICarType.h" />
+    <ClInclude Include="types\Sedan.h" />
+    <ClInclude Include="types\Suv.h" />
+    <ClInclude Include="types\Truck.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
